@@ -1,16 +1,18 @@
-import sqlite3
-from helpers import toDict
-from flask import Flask, jsonify
+import service
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
 @app.route("/")
 def index():
-    connection = sqlite3.connect("./data/taco.db")
-    connection.row_factory = sqlite3.Row
-    cursor = connection.cursor()
-    data = cursor.execute("""
-        SELECT * FROM "taco_table"
-    """).fetchall()
-    data = toDict(data)
+    if request.args.get("pattern"):
+        pattern = request.args.get("pattern")
+        data = service.getPattern(pattern)
+        return data
+    data = service.getAll()
+    return jsonify(data)
+
+@app.route("/food/<id>")
+def getByID(id):
+    data = service.getByID(id)
     return jsonify(data)
